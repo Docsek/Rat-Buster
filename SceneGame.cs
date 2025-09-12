@@ -14,7 +14,6 @@ public class SceneGame : Scene
     private static int starveTime = 40;
     private static int maxSuperSenseCharges = 3;
 
-
     // Game objects in the scene
     private Timer moveTimer;
     private Timer starveTimer;
@@ -23,6 +22,7 @@ public class SceneGame : Scene
     private Rat rat;
     private int score;
     private static int superSenseCharges;
+    public static Sound squeak;
 
     public SceneGame()
     {
@@ -34,27 +34,9 @@ public class SceneGame : Scene
         this.score = 0;
         superSenseCharges = maxSuperSenseCharges;
     }
-
-    // What happens every time the snale moves
-    public void OnMoveTimer()
-    {
-        snake.Move();
-        if (rat.IsEaten() == true)
-        {
-            snake.Grow();
-            // this would be for traditional snake :
-            //snake.SpeedUp(); 
-            //moveTimer.SetDuration(snake.moveSpeed); -> This was needed because Nico's code didn't work
-            rat.Respawn();
-            starveTimer.Reset();
-            score++;
-            if (rat.isVisible) rat.Toggle(); // hide the rat again if super sense was active
-        }
-        if (snake.IsCollidingWithSelf() == true) Loose();
-    }
     public override void Load()
     {
-        //Console.WriteLine("SceneGame.Load : ICI");
+        squeak = Raylib.LoadSound("sounds/Squeak.wav");
     }
     public override void Update(float dt)
     {
@@ -73,15 +55,32 @@ public class SceneGame : Scene
     }
     public override void Unload()
     {
-        //Console.WriteLine("SceneGame.Unload : ICI");
+        Raylib.UnloadSound(squeak);
     }
 
+    // What happens every time the snale moves
+    public void OnMoveTimer()
+    {
+        snake.Move();
+        if (rat.IsEaten() == true)
+        {
+            snake.Grow();
+            // this would be for traditional snake :
+            //snake.SpeedUp(); 
+            //moveTimer.SetDuration(snake.moveSpeed); -> This was needed because Nico's code didn't work
+            rat.Respawn();
+            starveTimer.Reset();
+            score++;
+            if (rat.isVisible) rat.Toggle(); // hide the rat again if super sense was active
+            Raylib.PlaySound(squeak);
+        }
+        if (snake.IsCollidingWithSelf() == true) Loose();
+    }
     private void Loose()
     {
         Console.WriteLine("GAME OVER ");
         SceneManager.Load<SceneGameOver>();
     }
-
     private void DrawInterface()
     {
         int topMargin = 2;
